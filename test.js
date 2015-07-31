@@ -38,18 +38,7 @@ function Test(message) {
 	 * @return {Unit}        A Unit test.
 	 */
 	function expect(what) {
-		var result;
-		if(typeof what === "function") {
-			result = what();
-		} else {
-			result = what;
-		}
-
-		var unit = new Unit(result);
-		result = null;
-
-
-		return unit;
+		return new Unit(what);
 	};
 
 	return {
@@ -67,7 +56,7 @@ Test.prototype.output = null;
  * An object that allows configuration of the Test prototype
  * @type {Object}
  */
-Test.prototype.config = {
+Test.config = {
 	/**
 	 * Controls the output of the Test.
 	 * @param  {Object} where The HTML element, or null if the console output is desired.
