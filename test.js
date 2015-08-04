@@ -23,11 +23,17 @@ function Test(message) {
 		 * @return {Boolean}                Returns true if the unit test passes. False otherwise
 		 */
 		function is(expectedResult) {
-			return Test.prototype.showTestResult(message, expectedResult, actualResult);
+			return Test.prototype.showTestResult(message, expectedResult, actualResult, Test.prototype.type.typeIs);
+		};
+
+		function contains(expectedResult) {
+			//you are here
+			return Test.prototype.showTestResult(message, expectedResult, actualResult, Test.prototype.type.typeContains);
 		};
 
 		return {
-			is: is
+			is: is,
+			contains: contains
 		};
 	};
 
@@ -56,27 +62,53 @@ Test.prototype.output = null;
  * An object that allows configuration of the Test prototype
  * @type {Object}
  */
-Test.config = {
+Test.config = (function() {
 	/**
 	 * Controls the output of the Test.
 	 * @param  {Object} where The HTML element, or null if the console output is desired.
 	 */
-	output: function(where) {
-		if(where instanceof HTMLElement) {
-			Test.prototype.output = where;
+	return {
+		output: function(where) {
+			if(where instanceof HTMLElement) {
+				Test.prototype.output = where;
+			}
 		}
 	}
-};
+})();
+
+
+/**
+ * Get the result of the Test
+ * @param  {Object}  expected The expected result
+ * @param  {Object}  actual   The actual result
+ * @param  {String}  type     The type of Test to perform
+ * @return {Boolean}          True if the Test passes, false otherwise
+ */
+Test.prototype.getResult = function(expected, actual, type) {
+	var passed;
+
+	if(type === Test.prototype.type.typeIs) {
+		passed = expected === actual;
+	} else if(type === Test.prototype.type.typeContains) {
+		passed = actual.indexOf(expected) > -1;
+	}
+	return passed;
+}
 
 /**
  * Create the result of the Test based on the expected result and the actual result
  * @param  {String} message  A description of the unit test
  * @param  {Object} expected The expected result of the unit test
  * @param  {Object} actual   The actual result of the test
+ * @param  {String} type     The type of test to perform; use the Test.prototype.type constants
  * @return {Object}          Returns the result as an HTML element (if specified), or a String (if null)
  */
-Test.prototype.createResult = function(message, expected, actual) {
-	var passed = expected === actual;
+Test.prototype.createResult = function(message, expected, actual, type) {
+
+
+	var passed = Test.prototype.getResult(expected, actual, type);
+
+
 	var wrapper_begin, wrapper_end, nl, log, out;
 
 	if(Test.prototype.output === null) {
@@ -128,9 +160,9 @@ Test.prototype.createResult = function(message, expected, actual) {
  * @param  {String}  message  A description of the unit test
  * @param  {Object}  expected The expected result of the unit test
  * @param  {Object}  actual   The actual result of the test
- * @return {Boolean}          True if the test passes. False otherwise
+ * @param  {String}  type     The type of test to perform; use the Test.prototype.type constants
  */
-Test.prototype.showTestResult = function(message, expected, actual) {
+Test.prototype.showTestResult = function(message, expected, actual, type) {
 	var out = Test.prototype.createResult.apply(this, arguments);
 
 	if(Test.prototype.output !== null) {
@@ -140,8 +172,6 @@ Test.prototype.showTestResult = function(message, expected, actual) {
 	}
 
 	out = null;
-
-	return expected === actual;
 };
 
 /**
@@ -153,4 +183,14 @@ Test.prototype.stylize = function(element, styles) {
 	Object.keys(styles).forEach(function(style) {
 		element.style[style] = styles[style];
 	});
+};
+
+/**
+ * Constants for use in showTestResult
+ * Describes the type of test to perform
+ * @type {Object}
+ */
+Test.prototype.type = {
+	typeIs: "is",
+	typeContains: "contains"
 };
