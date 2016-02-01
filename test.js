@@ -12,29 +12,34 @@
 "use strict";
 
 function Test(message) {
+	var exports = {};
+
 	/**
 	 * An object representing a unit test. The Unit takes in the actual result, and compares it to the expected result.
 	 * @param {Object} actualResult The actual result of the unit test
 	 */
 	function Unit(actualResult) {
+		var exports = {};
+
 		/**
 		 * Checks whether or not the actual result is equal to the expected result.
 		 * @param  {Object}  expectedResult The expected result of the unit test
 		 * @return {Boolean}                Returns true if the unit test passes. False otherwise
 		 */
-		function is(expectedResult) {
-			return Test.prototype.showTestResult(message, expectedResult, actualResult, Test.prototype.type.typeIs);
-		};
+		exports.toBe = expectedResult => Test.prototype.showTestResult(message, expectedResult, actualResult, Test.prototype.type.typeIs);
 
-		function contains(expectedResult) {
-			//you are here
-			return Test.prototype.showTestResult(message, expectedResult, actualResult, Test.prototype.type.typeContains);
-		};
+		//TODO: you are here.
+		exports.contains = expectedResult => Test.prototype.showTestResult(message, expectedResult, actualResult, Test.prototype.type.typeContains);
 
-		return {
-			is: is,
-			contains: contains
-		};
+		return exports;
+	}
+
+
+	exports.do = what => {
+		if(typeof what === 'function') {
+			what();
+		}
+		return exports;
 	};
 
 
@@ -43,14 +48,10 @@ function Test(message) {
 	 * @param  {Object} what An expression to evaluate
 	 * @return {Unit}        A Unit test.
 	 */
-	function expect(what) {
-		return new Unit(what);
-	};
+	exports.expect = what => new Unit(what);
 
-	return {
-		expect: expect
-	};
-};
+	return exports;
+}
 
 /**
  * Specifies the HTML element where the test result should be output to. If null, the result is output to the console.
@@ -73,7 +74,7 @@ Test.config = (function() {
 				Test.prototype.output = where;
 			}
 		}
-	}
+	};
 })();
 
 
@@ -93,7 +94,7 @@ Test.prototype.getResult = function(expected, actual, type) {
 		passed = actual.indexOf(expected) > -1;
 	}
 	return passed;
-}
+};
 
 /**
  * Create the result of the Test based on the expected result and the actual result
