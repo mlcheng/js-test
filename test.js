@@ -1,6 +1,6 @@
 /***********************************************
 
-  "test.js"
+  'test.js'
 
   Created by Michael Cheng on 07/23/2015 10:12
             http://michaelcheng.us/
@@ -9,32 +9,39 @@
 
 ***********************************************/
 
-"use strict";
+'use strict';
 
+/**
+ * To use custom validation, specify a function with .using()
+ * The first parameter is the expected value
+ * The second parameter is the actual value
+ *
+ * See Test.ValidationFunction for built-in examples
+ */
 function Test(message) {
 	var exports = {};
 
 	/**
-	 * An object representing a unit test. The Unit takes in the actual result, and compares it to the expected result.
-	 * @param {Object} actualResult The actual result of the unit test
+	 * The validation function to use for comparing results
+	 * @type {Function}
 	 */
-	function Unit(actualResult) {
-		var exports = {};
+	var validationFunction;
 
-		/**
-		 * Checks whether or not the actual result is equal to the expected result.
-		 * @param  {Object}  expectedResult The expected result of the unit test
-		 * @return {Boolean}                Returns true if the unit test passes. False otherwise
-		 */
-		exports.toBe = expectedResult => Test.prototype.showTestResult(message, expectedResult, actualResult, Test.prototype.type.typeIs);
-
-		//TODO: you are here.
-		exports.contains = expectedResult => Test.prototype.showTestResult(message, expectedResult, actualResult, Test.prototype.type.typeContains);
-
+	/**
+	 * Set a validation function to use
+	 * @param  {Function} _validationFunction The validation function to use
+	 * @return {Object}                     The Test object for chaining
+	 */
+	exports.using = _validationFunction => {
+		validationFunction = _validationFunction;
 		return exports;
-	}
+	};
 
-
+	/**
+	 * Perform a function before testing the result
+	 * @param  {Function} what The function to perform
+	 * @return {Object}      The Test object for chaining
+	 */
 	exports.do = what => {
 		if(typeof what === 'function') {
 			what();
@@ -42,156 +49,121 @@ function Test(message) {
 		return exports;
 	};
 
-
 	/**
-	 * Defines an expression and evaluates its result
-	 * @param  {Object} what An expression to evaluate
-	 * @return {Unit}        A Unit test.
+	 * Specify what to test
+	 * @param  {Object} what What to test
+	 * @return {UnitTest}      Returns a UnitTest where test result can be found
 	 */
-	exports.expect = what => new Unit(what);
+	exports.expect = what => new UnitTest(what);
+
+	function UnitTest(actualResult) {
+		var exports = {};
+
+		/**
+		 * The main comparison function
+		 * @param  {Object} expectedResult The expected result
+		 */
+		exports.to = (expectedResult) => {
+			Test.prototype.showResult(message, expectedResult, actualResult, validationFunction);
+		};
+
+		exports.toBe = exports.to;
+
+		exports.toHave = exports.to;
+
+		return exports;
+	}
 
 	return exports;
 }
 
 /**
- * Specifies the HTML element where the test result should be output to. If null, the result is output to the console.
+ * Specifies the output area for the test results
  * @type {Object}
  */
 Test.prototype.output = null;
 
-/**
- * An object that allows configuration of the Test prototype
- * @type {Object}
- */
-Test.config = (function() {
-	/**
-	 * Controls the output of the Test.
-	 * @param  {Object} where The HTML element, or null if the console output is desired.
-	 */
-	return {
-		output: function(where) {
-			if(where instanceof HTMLElement) {
-				Test.prototype.output = where;
-			}
-		}
-	};
-})();
+Test.prototype.showResult = (message, expectedResult, actualResult, validationFunction) => {
+	//Default validation function is EQUALS
+	var result = Test.prototype.createResult(message, expectedResult, actualResult, validationFunction || Test.ValidationFunction.EQUALS);
 
 
-/**
- * Get the result of the Test
- * @param  {Object}  expected The expected result
- * @param  {Object}  actual   The actual result
- * @param  {String}  type     The type of Test to perform
- * @return {Boolean}          True if the Test passes, false otherwise
- */
-Test.prototype.getResult = function(expected, actual, type) {
-	var passed;
-
-	if(type === Test.prototype.type.typeIs) {
-		passed = expected === actual;
-	} else if(type === Test.prototype.type.typeContains) {
-		passed = actual.indexOf(expected) > -1;
+	if(!Test.prototype.output) {
+		console.log(result);
+	} else {
+		Test.prototype.output.appendChild(result);
 	}
-	return passed;
 };
 
-/**
- * Create the result of the Test based on the expected result and the actual result
- * @param  {String} message  A description of the unit test
- * @param  {Object} expected The expected result of the unit test
- * @param  {Object} actual   The actual result of the test
- * @param  {String} type     The type of test to perform; use the Test.prototype.type constants
- * @return {Object}          Returns the result as an HTML element (if specified), or a String (if null)
- */
-Test.prototype.createResult = function(message, expected, actual, type) {
+Test.prototype.createResult = (message, expectedResult, actualResult, validationFunction) => {
+	var passed = validationFunction.call(this, expectedResult, actualResult);
+	var strings = Test.prototype.output ? {
+		wrapperBegin: '<strong>',
+		wrapperEnd: '</strong>',
+		newLine: '<br>'
+	} : {
+		wrapperBegin: '"',
+		wrapperEnd: '"',
+		newLine: '\n>> '
+	};
 
-
-	var passed = Test.prototype.getResult(expected, actual, type);
-
-
-	var wrapper_begin, wrapper_end, nl, log, out;
-
-	if(Test.prototype.output === null) {
-		wrapper_begin = "\"";
-		wrapper_end = "\"";
-		nl = "\n>> ";
-	} else {
-		wrapper_begin = "<strong>";
-		wrapper_end = "</strong>";
-		nl = "<br>";
+	var customValidationFunction = '';
+	if(validationFunction !== Test.ValidationFunction.EQUALS) {
+		customValidationFunction = ' (using custom validation function)';
 	}
 
-	out = document.createElement("div");
-	Test.prototype.stylize(out, {
-		"line-height": "1.5em",
-		"margin": "0.5em 0",
-		"padding": "0.5em"
-	});
 
-	log = "Testing: " + message + nl;
+	var result = `Testing: ${message}${customValidationFunction}${strings.newLine}`;
+	var bgColor;
 	if(passed) {
-		log += "Passed!";
-		Test.prototype.stylize(out, {
-			"background": "#c5e1a5"
-		});
+		result += '✔ Passed!';
+		bgColor = '#c8e6c9';
 	} else {
-		log += "Failed. Expected " + wrapper_begin + expected + wrapper_end + " (" + typeof expected + "), got " + wrapper_begin + actual + wrapper_end + " (" + typeof actual + ") instead.";
-		Test.prototype.stylize(out, {
-			"background": "#ef9a9a"
-		});
+		result += `😫 Failed. Expected ${strings.wrapperBegin}${expectedResult}${strings.wrapperEnd} (${typeof expectedResult}), got ${strings.wrapperBegin}${actualResult}${strings.wrapperEnd} (${typeof actualResult}) instead.`;
+		bgColor = '#ff8a80';
 	}
 
-	out.insertAdjacentHTML("beforeend", log);
-
+	if(Test.prototype.output) {
+		var fragment = document.createElement('div');
+		Test.prototype.stylize(fragment, {
+			'line-height': '1.5em',
+			'margin': '0.5em 0',
+			'padding': '0.5em',
+			'background': bgColor
+		});
+		fragment.insertAdjacentHTML('beforeend', result);
+		result = fragment;
+	}
 
 	passed = null;
-	wrapper_begin = null;
-	wrapper_end = null;
+	bgColor = null;
 
-	if(Test.prototype.output === null) {
-		return log;
-	} else {
-		return out;
-	}
+	return result;
 };
 
-/**
- * Displays the test result to the desired location
- * @param  {String}  message  A description of the unit test
- * @param  {Object}  expected The expected result of the unit test
- * @param  {Object}  actual   The actual result of the test
- * @param  {String}  type     The type of test to perform; use the Test.prototype.type constants
- */
-Test.prototype.showTestResult = function(message, expected, actual, type) {
-	var out = Test.prototype.createResult.apply(this, arguments);
-
-	if(Test.prototype.output !== null) {
-		Test.prototype.output.appendChild(out);
-	} else {
-		console.log(out);
-	}
-
-	out = null;
-};
-
-/**
- * Stylize an element with the specified style object
- * @param  {Object} element The element to stylize
- * @param  {Object} styles  An object containing styles for the element
- */
 Test.prototype.stylize = function(element, styles) {
 	Object.keys(styles).forEach(function(style) {
 		element.style[style] = styles[style];
 	});
 };
 
+Test.config = (function() {
+	var exports = {};
+
+	exports.output = where => {
+		if(where instanceof HTMLElement) {
+			Test.prototype.output = where;
+		}
+	};
+
+	return exports;
+})();
+
 /**
- * Constants for use in showTestResult
- * Describes the type of test to perform
+ * Validation functions for custom tests
  * @type {Object}
  */
-Test.prototype.type = {
-	typeIs: "is",
-	typeContains: "contains"
+Test.ValidationFunction = {
+	EQUALS: (e, a) => e === a,
+	CONTAINS: (e, a) => ~a.indexOf(e)
 };
