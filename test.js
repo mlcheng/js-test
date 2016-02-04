@@ -1,6 +1,6 @@
 /***********************************************
 
-  'test.js'
+  "test.js"
 
   Created by Michael Cheng on 07/23/2015 10:12
             http://michaelcheng.us/
@@ -104,7 +104,7 @@ Test.prototype.createResult = (message, expectedResult, actualResult, validation
 	} : {
 		wrapperBegin: '"',
 		wrapperEnd: '"',
-		newLine: '\n>> '
+		newLine: '\n  >> '
 	};
 
 	var customValidationFunction = '';
