@@ -123,10 +123,10 @@ Test.prototype.createResult = (message, expectedResult, actualResult, validation
 	var result = `Testing: ${message}${customValidationFunction}${strings.newLine}`;
 	var bgColor;
 	if(passed) {
-		result += '✔ Passed!';
+		result += '[✔] Passed!';
 		bgColor = '#c8e6c9';
 	} else {
-		result += `😫 Failed. Expected ${strings.wrapperBegin}${expectedResult}${strings.wrapperEnd} (${typeof expectedResult}), got ${strings.wrapperBegin}${actualResult}${strings.wrapperEnd} (${typeof actualResult}) instead.`;
+		result += `[✖] Failed. Expected ${strings.wrapperBegin}${expectedResult}${strings.wrapperEnd} (${typeof expectedResult}), got ${strings.wrapperBegin}${actualResult}${strings.wrapperEnd} (${typeof actualResult}) instead.`;
 		bgColor = '#ff8a80';
 	}
 
@@ -174,3 +174,10 @@ Test.ValidationFunction = {
 	EQUALS: (e, a) => e === a,
 	CONTAINS: (e, a) => ~a.indexOf(e)
 };
+
+
+// Used for creating tests
+/* globals module */
+if(module) {
+	module.exports = Test;
+}
