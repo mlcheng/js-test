@@ -103,9 +103,9 @@ Where context is usually the NodeJS global `__dirname`. A sample test file would
 ```javascript
 'use strict';
 
-const inject = require(path/to/inject.js);
-const Test = require(path/to/test.js);
-inject(__dirname, relative/path/to/file/to/test.js);
+const inject = require('path/to/inject.js');
+const Test = require('path/to/test.js');
+inject(__dirname, 'relative/path/to/file/to/test.js');
 
 // Begin tests
 Test(...)
