@@ -19,21 +19,43 @@
  * See Test.ValidationFunction for built-in examples
  */
 function Test(message) {
+
+	// Exposed methods
 	var exports = {};
 
 	/**
 	 * The validation function to use for comparing results
 	 * @type {Function}
 	 */
-	var validationFunction;
+	var _validationFunction;
+
+	function UnitTest(actualResult) {
+		var exports = {};
+
+		/**
+		 * The main comparison function
+		 * @param  {Object} expectedResult The expected result
+		 */
+		exports.to = expectedResult => {
+			Promise.resolve(actualResult).then((result) => {
+				Test.prototype.showResult(message, expectedResult, result, _validationFunction);
+			});
+		};
+
+		exports.toBe = exports.to;
+
+		exports.toHave = exports.to;
+
+		return exports;
+	}
 
 	/**
 	 * Set a validation function to use
 	 * @param  {Function} _validationFunction The validation function to use
 	 * @return {Object}                     The Test object for chaining
 	 */
-	exports.using = _validationFunction => {
-		validationFunction = _validationFunction;
+	exports.using = validationFunction => {
+		_validationFunction = validationFunction;
 		return exports;
 	};
 
@@ -56,23 +78,8 @@ function Test(message) {
 	 */
 	exports.expect = what => new UnitTest(what);
 
-	function UnitTest(actualResult) {
-		var exports = {};
-
-		/**
-		 * The main comparison function
-		 * @param  {Object} expectedResult The expected result
-		 */
-		exports.to = (expectedResult) => {
-			Test.prototype.showResult(message, expectedResult, actualResult, validationFunction);
-		};
-
-		exports.toBe = exports.to;
-
-		exports.toHave = exports.to;
-
-		return exports;
-	}
+	// Alias for expect
+	exports.assert = exports.expect;
 
 	return exports;
 }
