@@ -178,6 +178,6 @@ Test.ValidationFunction = {
 
 // Used for creating tests
 /* globals module */
-if(module) {
+if(typeof module !== 'undefined') {
 	module.exports = Test;
 }
