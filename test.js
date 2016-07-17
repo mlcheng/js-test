@@ -90,10 +90,21 @@ function Test(message) {
  */
 Test.prototype.output = null;
 
+/**
+ * Hide tests that passed. In effect, only show test that have failed.
+ * This can be set with Test.config
+ * @type {Boolean}
+ */
+Test.prototype.hidePassed = false;
+
 Test.prototype.showResult = (message, expectedResult, actualResult, validationFunction) => {
 	//Default validation function is EQUALS
 	var result = Test.prototype.createResult(message, expectedResult, actualResult, validationFunction || Test.ValidationFunction.EQUALS);
 
+	// The test passed and is being hidden by configuration
+	if(result === null) {
+		return;
+	}
 
 	if(!Test.prototype.output) {
 		console.log(result);
@@ -102,16 +113,26 @@ Test.prototype.showResult = (message, expectedResult, actualResult, validationFu
 	}
 };
 
+Test.prototype.getResult = (validationFunction, expectedResult, actualResult) => validationFunction.call(this, expectedResult, actualResult);
+
 Test.prototype.createResult = (message, expectedResult, actualResult, validationFunction) => {
-	var passed = validationFunction.call(this, expectedResult, actualResult);
+	var passed = Test.prototype.getResult(validationFunction, expectedResult, actualResult) === true;
+
+	// The config wants passed tests to be hidden
+	if(Test.prototype.hidePassed && passed) {
+		return null;
+	}
+
 	var strings = Test.prototype.output ? {
 		wrapperBegin: '<strong>',
 		wrapperEnd: '</strong>',
-		newLine: '<br>'
+		newLine: '<br>',
+		separator: ''
 	} : {
 		wrapperBegin: '"',
 		wrapperEnd: '"',
-		newLine: '\n  >> '
+		newLine: '\n  >> ',
+		separator: '\n-------------------------------------\n\n'
 	};
 
 	var customValidationFunction = '';
@@ -120,7 +141,7 @@ Test.prototype.createResult = (message, expectedResult, actualResult, validation
 	}
 
 
-	var result = `Testing: ${message}${customValidationFunction}${strings.newLine}`;
+	var result = `${strings.separator}Testing: ${message}${customValidationFunction}${strings.newLine}`;
 	var bgColor;
 	if(passed) {
 		result += '[✔] Passed!';
@@ -163,6 +184,13 @@ Test.config = (function() {
 		}
 	};
 
+	exports.hidePassed = hide => {
+		Test.prototype.hidePassed = hide;
+		if(hide) {
+			console.warn('Passed tests are hidden!');
+		}
+	};
+
 	return exports;
 })();
 
@@ -173,7 +201,7 @@ Test.config = (function() {
 Test.ValidationFunction = {
 	EQUALS: (e, a) => e === a,
 	NOT_EQUALS: (e, a) => e !== a,
-	CONTAINS: (e, a) => ~a.indexOf(e)
+	CONTAINS: (e, a) => !!~a.indexOf(e)
 };
 
 
