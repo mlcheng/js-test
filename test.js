@@ -172,12 +172,25 @@ Test.config = (function() {
  */
 Test.ValidationFunction = {
 	EQUALS: (e, a) => e === a,
+	NOT_EQUALS: (e, a) => e !== a,
 	CONTAINS: (e, a) => ~a.indexOf(e)
 };
 
 
-// Used for creating tests
-/* globals module */
+// Used for creating tests, in Node environment
+/* globals module, require */
 if(typeof module !== 'undefined') {
-	module.exports = Test;
+	const fs = require('fs');
+	const vm = require('vm');
+
+	/**
+	 * Read a file and inject it into tests using Node vm
+	 * @param  {String} context The path to the file, usually __dirname
+	 * @param  {String} relPath Relative path from the test file to the file to include
+	 */
+	const inject = (context, relPath) => {
+		const PATH = `${context}/${relPath}`;
+		vm.runInThisContext(fs.readFileSync(PATH, 'utf8'), PATH);
+	};
+	module.exports = { Test, inject };
 }

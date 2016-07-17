@@ -41,9 +41,9 @@ By default, the `to()` method will use strict comparison (`===`) when comparing 
 
 ```javascript
 Test("The word 'hello' should contain the letter 'h'")
-  .using((expected, actual) => ~actual.indexOf(expected))
-  .expect('hello')
-  .toHave('h');
+	.using((expected, actual) => ~actual.indexOf(expected))
+	.expect('hello')
+	.toHave('h');
 ```
 
 The comparator function takes the expected value as the first argument and the actual value as the second. Thus, `actual` is 'hello', and `expected` is the character 'h'.
@@ -52,8 +52,8 @@ There are two built-in comparators in this testing framework, including the cont
 
 ```javascript
 Test()
-  .using(Test.ValidationFunction.CONTAINS || Test.ValidationFunction.EQUALS)
-  //...
+	.using(Test.ValidationFunction.CONTAINS || Test.ValidationFunction.EQUALS)
+	//...
 ```
 
 ### Actions
@@ -62,14 +62,16 @@ Before executing a test, it is possible to perform some action first. This can b
 ```javascript
 let data;
 const updateData = () => new Promise((resolve) => {
-  data = 'hello';
-  resolve();
+	setTimeout(() => {
+		data = 'hello';
+		resolve();
+	});
 });
 
 Test("Get data from service")
-  .do(updateData)
-  .expect(data)
-  .toBe('hello');
+	.do(updateData)
+	.expect(data)
+	.toBe('hello');
 ```
 
 Note that you can `.expect()` a Promise to have a result too.
@@ -78,8 +80,8 @@ Note that you can `.expect()` a Promise to have a result too.
 const fetchName = Promise.resolve('Michael');
 
 Test("Get name from Promise")
-  .expect(fetchName)
-  .toBe('Michael');
+	.expect(fetchName)
+	.toBe('Michael');
 ```
 
 ### Result output
@@ -92,7 +94,7 @@ Test.config.output(document.body);
 And the results will be styled and beautiful to look at.
 
 ## Real-world usage
-When you want to test your code, require `inject.js` and `test.js` in your file. `inject()` will allow you to inject any file into the test scenario and run it in the same context. The syntax of `inject()` is as follows:
+When you want to test your code, require `test.js` in your file. An exported `inject()` function will allow you to inject any file into the test scenario and run it in the same context. The syntax of `inject()` is as follows:
 
 ```javascript
 inject(context, relativePath);
@@ -103,8 +105,7 @@ Where context is usually the NodeJS global `__dirname`. A sample test file would
 ```javascript
 'use strict';
 
-const inject = require('path/to/inject.js');
-const Test = require('path/to/test.js');
+const { Test, inject } = require('path/to/test.js');
 inject(__dirname, 'relative/path/to/file/to/test.js');
 
 // Begin tests
