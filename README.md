@@ -61,12 +61,9 @@ Before executing a test, it is possible to perform some action first. This can b
 
 ```javascript
 let data;
-const updateData = () => new Promise((resolve) => {
-	setTimeout(() => {
-		data = 'hello';
-		resolve();
-	});
-});
+const updateData = () => {
+	data = 'hello';
+};
 
 Test("Get data from service")
 	.do(updateData)
