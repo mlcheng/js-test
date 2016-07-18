@@ -8,7 +8,7 @@ A demo is available on my [playground](https://www.michaelcheng.us/playground/li
 Usage is fairly simple. Let's first setup an `add()` function.
 
 ```javascript
-const add = (x, y) => x + y;
+const add = (...nums) => nums.reduce((total, n) => total + n);
 ```
 
 To test this function, first set the description of the test case.
@@ -20,13 +20,16 @@ Test("1+1 should be 2");
 After that, you can specify the test to run
 
 ```javascript
-Test("1+1 should be 2").expect(add(1+1));
+Test("1+1 should be 2")
+	.expect(add(1+1));
 ```
 
 And then what you expect the result to be
 
 ```javascript
-Test("1+1 should be 2").expect(add(1+1)).toBe(2);
+Test("1+1 should be 2")
+	.expect(add(1+1))
+	.toBe(2);
 ```
 
 ### Alias
@@ -34,7 +37,7 @@ Test("1+1 should be 2").expect(add(1+1)).toBe(2);
 `.to() === .toBe() === .toHave()`
 
 ## Advanced usage
-This test framework has some extras that may be useful.
+This test framework also has some extras that may be useful.
 
 ### Comparators
 By default, the `to()` method will use strict comparison (`===`) when comparing the expected and actual result. You can specify what kind of comparator to use in your test using `.using()`.
@@ -48,11 +51,15 @@ Test("The word 'hello' should contain the letter 'h'")
 
 The comparator function takes the expected value as the first argument and the actual value as the second. Thus, `actual` is 'hello', and `expected` is the character 'h'.
 
-There are two built-in comparators in this testing framework, including the contains comparator above. You can use them by declaring
+There are three built-in comparators in this testing framework, including the contains comparator above. You can use them by declaring
 
 ```javascript
 Test()
-	.using(Test.ValidationFunction.CONTAINS || Test.ValidationFunction.EQUALS)
+	.using(
+		Test.ValidationFunction.EQUALS
+		|| Test.ValidationFunction.NOT_EQUALS
+		|| Test.ValidationFunction.CONTAINS
+	)
 	//...
 ```
 
@@ -81,7 +88,10 @@ Test("Get name from Promise")
 	.toBe('Michael');
 ```
 
-### Result output
+### Test config
+You have a few options to configure the test.
+
+#### Output location
 By default, the test result will be output to the console. If you desire, you can specify the output location of the tests
 
 ```javascript
@@ -89,6 +99,13 @@ Test.config.output(document.body);
 ```
 
 And the results will be styled and beautiful to look at.
+
+#### Hide passing tests
+By default, all test results regardless of whether they pass or not will be shown. To hide tests that pass, simply
+
+```javascript
+Test.config.hidePassed(true);
+```
 
 ## Real-world usage
 When you want to test your code, require `test.js` in your file. An exported `inject()` function will allow you to inject any file into the test scenario and run it in the same context. The syntax of `inject()` is as follows:
