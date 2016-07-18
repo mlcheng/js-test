@@ -85,6 +85,21 @@ function Test(message) {
 }
 
 /**
+ * Validation functions for custom tests
+ * @type {Object}
+ */
+Test.ValidationFunction = {
+	EQUALS: (e, a) => e === a,
+	NOT_EQUALS: (e, a) => e !== a,
+	CONTAINS: (e, a) => !!~a.indexOf(e)
+};
+
+Test.Console = {
+	CONSOLE: Symbol('console'),
+	TERMINAL: Symbol('terminal')
+};
+
+/**
  * Specifies the output area for the test results
  * @type {Object}
  */
@@ -97,19 +112,47 @@ Test.prototype.output = null;
  */
 Test.prototype.hidePassed = false;
 
+/**
+ * Colorize the output in the console. Defaults to true. Use false if in NodeJS environment
+ * @type {Boolean}
+ */
+Test.prototype.colorMethod = Test.Console.CONSOLE;
+
 Test.prototype.showResult = (message, expectedResult, actualResult, validationFunction) => {
 	//Default validation function is EQUALS
 	var result = Test.prototype.createResult(message, expectedResult, actualResult, validationFunction || Test.ValidationFunction.EQUALS);
 
-	// The test passed and is being hidden by configuration
+
+	// The test passed and is being hidden by configuration setting
 	if(result === null) {
 		return;
 	}
 
+
 	if(!Test.prototype.output) {
-		console.log(result);
+		// Output to console
+		if(Test.prototype.colorMethod === Test.Console.CONSOLE) {
+			console.log(`%c${result.result}`, `
+				color: ${result.bgColor};
+				text-shadow: 0 0 1px rgba(0, 0, 0, .2);
+				${!result.passed ? 'font-size: 150%; font-weight: bold;' : ''}
+			`);
+		} else {
+			// Output to terminal, NodeJS environment
+			var colors = {};
+			if(result.passed) {
+				colors.bg = '\x1b[49m';
+				colors.fg = '\x1b[92m';
+			} else {
+				colors.bg = '\x1b[101m';
+				colors.fg = '\x1b[93m';
+			}
+			console.log(
+				`${colors.bg}${colors.fg}${result.result}\x1b[0m`
+			);
+		}
 	} else {
-		Test.prototype.output.appendChild(result);
+		Test.prototype.output.appendChild(result.result);
 	}
 };
 
@@ -131,8 +174,8 @@ Test.prototype.createResult = (message, expectedResult, actualResult, validation
 	} : {
 		wrapperBegin: '"',
 		wrapperEnd: '"',
-		newLine: '\n  >> ',
-		separator: '\n-------------------------------------\n\n'
+		newLine: '\n >> ',
+		separator: '-------------------------------------\n'
 	};
 
 	var customValidationFunction = '';
@@ -163,10 +206,7 @@ Test.prototype.createResult = (message, expectedResult, actualResult, validation
 		result = fragment;
 	}
 
-	passed = null;
-	bgColor = null;
-
-	return result;
+	return { result, passed, bgColor };
 };
 
 Test.prototype.stylize = function(element, styles) {
@@ -191,23 +231,19 @@ Test.config = (function() {
 		}
 	};
 
+	exports.colorMethod = method => {
+		Test.prototype.colorMethod = method;
+	};
+
 	return exports;
 })();
-
-/**
- * Validation functions for custom tests
- * @type {Object}
- */
-Test.ValidationFunction = {
-	EQUALS: (e, a) => e === a,
-	NOT_EQUALS: (e, a) => e !== a,
-	CONTAINS: (e, a) => !!~a.indexOf(e)
-};
 
 
 // Used for creating tests, in Node environment
 /* globals module, require */
 if(typeof module !== 'undefined') {
+	Test.config.colorMethod(Test.Console.TERMINAL);
+
 	const fs = require('fs');
 	const vm = require('vm');
 

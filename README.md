@@ -107,8 +107,18 @@ By default, all test results regardless of whether they pass or not will be show
 Test.config.hidePassed(true);
 ```
 
+#### Console color
+If using the framework in a NodeJS environment, it will automatically colorize the output. If you wish to change the coloring method (you shouldn't), you can set it by
+
+```javascript
+Test.config.colorMethod(
+	Test.Console.CONSOLE
+	|| Test.Console.TERMINAL
+);
+```
+
 ## Real-world usage
-When you want to test your code, require `test.js` in your file. An exported `inject()` function will allow you to inject any file into the test scenario and run it in the same context. The syntax of `inject()` is as follows:
+When you want to test your code, require `test.js` in your file. An exported `inject()` function will allow you to inject any file into the test scenario and run it in the context of your test. The syntax of `inject()` is as follows:
 
 ```javascript
 inject(context, relativePath);
