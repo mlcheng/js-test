@@ -36,3 +36,7 @@ Test('Test().do() should execute the specified callback')
 Test('Validation function `contains` should specify if the actual result contains the expected result')
 	.expect(Test.ValidationFunction.CONTAINS('M', 'Michael'))
 	.toBe(true);
+
+Test('Failed tests should be colored (use your eyes to verify)')
+	.assert(false)
+	.toBe(true);

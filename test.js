@@ -46,6 +46,8 @@ function Test(message) {
 
 		exports.toHave = exports.to;
 
+		exports.is = exports.to;
+
 		return exports;
 	}
 
