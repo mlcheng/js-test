@@ -21,14 +21,14 @@ After that, you can specify the test to run
 
 ```javascript
 Test("1+1 should be 2")
-	.expect(add(1+1));
+	.expect(add(1, 1));
 ```
 
 And then what you expect the result to be
 
 ```javascript
 Test("1+1 should be 2")
-	.expect(add(1+1))
+	.expect(add(1, 1))
 	.toBe(2);
 ```
 
