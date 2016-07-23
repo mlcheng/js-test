@@ -38,5 +38,5 @@ Test('Validation function `contains` should specify if the actual result contain
 	.toBe(true);
 
 Test('Failed tests should be colored (use your eyes to verify)')
-	.assert(false)
-	.toBe(true);
+	.assert(0.1+0.2)
+	.toBe(0.3);
