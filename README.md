@@ -56,9 +56,9 @@ There are three built-in comparators in this testing framework, including the co
 ```javascript
 Test()
 	.using(
-		Test.ValidationFunction.EQUALS
-		|| Test.ValidationFunction.NOT_EQUALS
-		|| Test.ValidationFunction.CONTAINS
+		Test.ValidationFunction.EQUALS ||
+		Test.ValidationFunction.NOT_EQUALS ||
+		Test.ValidationFunction.CONTAINS
 	)
 	//...
 ```
@@ -112,8 +112,8 @@ If using the framework in a NodeJS environment, it will automatically colorize t
 
 ```javascript
 Test.config.colorMethod(
-	Test.Console.CONSOLE
-	|| Test.Console.TERMINAL
+	Test.Console.CONSOLE ||
+	Test.Console.TERMINAL
 );
 ```
 

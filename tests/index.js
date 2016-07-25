@@ -37,6 +37,20 @@ Test('Validation function `contains` should specify if the actual result contain
 	.expect(Test.ValidationFunction.CONTAINS('M', 'Michael'))
 	.toBe(true);
 
+Test('Shallow array validation should be correct')
+	.using(Test.ValidationFunction.ARRAY_SHALLOW)
+	.expect(['a', 'b', 1, 2])
+	.toBe(['a', 'b', 1, 2]);
+
+Test('Deep object validation should be correct')
+	.using(Test.ValidationFunction.OBJECT_DEEP)
+	.expect({
+		k: ['a', 'b', [1, 2]]
+	})
+	.toBe({
+		k: ['a', 'b', [1, 2]]
+	});
+
 Test('Failed tests should be colored (use your eyes to verify)')
 	.assert(0.1+0.2)
 	.toBe(0.3);

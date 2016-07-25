@@ -93,7 +93,33 @@ function Test(message) {
 Test.ValidationFunction = {
 	EQUALS: (e, a) => e === a,
 	NOT_EQUALS: (e, a) => e !== a,
-	CONTAINS: (e, a) => !!~a.indexOf(e)
+	CONTAINS: (e, a) => !!~a.indexOf(e),
+
+	ARRAY_SHALLOW: function(e, a) {
+		var i = e.length;
+		if(a.length !== i) return false;
+		while(i--) {
+			if(a[i] !== e[i]) return false;
+		}
+		return true;
+	},
+	
+	OBJECT_DEEP: function(e, a) {
+		// http://stackoverflow.com/a/16788517/4230736
+		if(e == null || a == null) return e === a;
+		if(e.constructor !== a.constructor) return false;
+		if(e instanceof Function) return e === a;
+		if(e instanceof RegExp) return e === a;
+		if(e === a || e.valueOf() === a.valueOf()) return true;
+		if(Array.isArray(e) && e.length !== a.length) return false;
+		if(e instanceof Date) return false;
+		if(!(e instanceof Object)) return false;
+		if(!(a instanceof Object)) return false;
+
+		var level = Object.keys(e);
+		return Object.keys(a).every(k => ~level.indexOf(k)) &&
+			level.every(k => Test.ValidationFunction.OBJECT_DEEP(e[k], a[k]));
+	}
 };
 
 Test.Console = {
