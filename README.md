@@ -51,14 +51,16 @@ Test("The word 'hello' should contain the letter 'h'")
 
 The comparator function takes the expected value as the first argument and the actual value as the second. Thus, `actual` is 'hello', and `expected` is the character 'h'.
 
-There are three built-in comparators in this testing framework, including the contains comparator above. You can use them by declaring
+There are five built-in comparators in this testing framework, including the contains comparator above. You can use them by declaring
 
 ```javascript
 Test()
 	.using(
 		Test.ValidationFunction.EQUALS ||
 		Test.ValidationFunction.NOT_EQUALS ||
-		Test.ValidationFunction.CONTAINS
+		Test.ValidationFunction.CONTAINS ||
+		Test.ValidationFunction.ARRAY_SHALLOW ||
+		Test.ValidationFunction.OBJECT_DEEP
 	)
 	//...
 ```

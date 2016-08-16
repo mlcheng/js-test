@@ -268,8 +268,8 @@ Test.config = (function() {
 
 
 // Used for creating tests, in Node environment
-/* globals module, require */
 if(typeof module !== 'undefined') {
+	/* globals module, require */
 	Test.config.colorMethod(Test.Console.TERMINAL);
 
 	const fs = require('fs');
@@ -284,5 +284,15 @@ if(typeof module !== 'undefined') {
 		const PATH = `${context}/${relPath}`;
 		vm.runInThisContext(fs.readFileSync(PATH, 'utf8'), PATH);
 	};
-	module.exports = { Test, inject };
+
+	/**
+	 * Create a namespace for iqwerty.{name}
+	 * Returns the require'd module under the namespace
+	 * @param  {String} name The namespace to create under iqwerty
+	 */
+	const namespace = name => ({
+		[name]: require(`../${name}/${name}.js`)
+	});
+
+	module.exports = { Test, inject, namespace };
 }
