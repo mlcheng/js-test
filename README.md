@@ -34,6 +34,7 @@ Test("1+1 should be 2")
 
 ### Alias
 `.expect() === .assert()`
+
 `.to() === .toBe() === .toHave() === .is()`
 
 ## Advanced usage
@@ -126,14 +127,27 @@ When you want to test your code, require `test.js` in your file. An exported `in
 inject(context, relativePath);
 ```
 
-Where context is usually the NodeJS global `__dirname`. A sample test file would look something like this:
+Where `context` is usually the NodeJS global `__dirname`. A sample test file would look something like this:
 
 ```javascript
 'use strict';
 
 const { Test, inject } = require('path/to/test.js');
-inject(__dirname, 'relative/path/to/file/to/test.js');
+inject(__dirname, '../relative/path/to/file/to/test.js');
 
 // Begin tests
 Test(...)
+```
+
+The `namespace()` function also exists; however, it is used purely for iQwerty's testing purposes. Nevertheless, its usage is as follows:
+
+```javascript
+const O = namespace(relativePath, ns);
+```
+
+The `relativePath` is the relative path to the file to test, usually some variation of `__dirname`. The `ns` is the namespace to add to the object `O`. The `ns` will be `require`'d and set to the `O.ns`. Sample usage would be like:
+
+```javascript
+const { Test, namespace } = require('path/to/test.js');
+const iqwerty = namespace(`${__dirname}/../`, 'cache'); // iqwerty.cache will be created
 ```
