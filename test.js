@@ -285,15 +285,5 @@ if(typeof module !== 'undefined') {
 		vm.runInThisContext(fs.readFileSync(PATH, 'utf8'), PATH);
 	};
 
-	/**
-	 * Create a namespace for iqwerty.{name}
-	 * Returns the require'd module under the namespace
-	 * @param  {String} context The relative path to the file, usually __dirname
-	 * @param  {String} name    The namespace to create under iqwerty
-	 */
-	const namespace = (context, name) => ({
-		[name]: require(`${context}/${name}.js`)
-	});
-
-	module.exports = { Test, inject, namespace };
+	module.exports = { Test, inject };
 }
