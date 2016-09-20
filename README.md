@@ -35,7 +35,7 @@ Test("1+1 should be 2")
 ### Alias
 `.expect() === .assert()`
 
-`.to() === .toBe() === .toHave() === .is()`
+`.to() === .toBe() === .toHave() === .is() === .equals()`
 
 ## Advanced usage
 This test framework also has some extras that may be useful.

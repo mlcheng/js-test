@@ -48,6 +48,8 @@ function Test(message) {
 
 		exports.is = exports.to;
 
+		exports.equals = exports.to;
+
 		return exports;
 	}
 

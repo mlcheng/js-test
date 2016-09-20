@@ -12,7 +12,7 @@
 'use strict';
 
 /* globals require */
-const { Test } = require('../test.js');
+const { Test, inject } = require('../test.js');
 
 
 Test('Test should be a function')
@@ -22,6 +22,10 @@ Test('Test should be a function')
 Test('Test should return an object')
 	.expect(typeof Test())
 	.toBe('object');
+
+Test('Test should contain the inject() function')
+	.expect(typeof inject)
+	.toBe('function');
 
 Test('Test().expect() and alias .assert() should return a UnitTest object')
 	.expect(typeof Test().expect() === typeof Test().assert())
@@ -40,14 +44,14 @@ Test('Validation function `contains` should specify if the actual result contain
 Test('Shallow array validation should be correct')
 	.using(Test.ValidationFunction.ARRAY_SHALLOW)
 	.expect(['a', 'b', 1, 2])
-	.toBe(['a', 'b', 1, 2]);
+	.equals(['a', 'b', 1, 2]);
 
 Test('Deep object validation should be correct')
 	.using(Test.ValidationFunction.OBJECT_DEEP)
 	.expect({
 		k: ['a', 'b', [1, 2]]
 	})
-	.toBe({
+	.equals({
 		k: ['a', 'b', [1, 2]]
 	});
 
