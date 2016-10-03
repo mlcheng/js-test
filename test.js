@@ -189,6 +189,14 @@ Test.prototype.showResult = (message, expectedResult, actualResult, validationFu
 Test.prototype.getResult = (validationFunction, expectedResult, actualResult) => validationFunction.call(this, expectedResult, actualResult);
 
 Test.prototype.createResult = (message, expectedResult, actualResult, validationFunction) => {
+
+	/**
+	 * Returns a readable string of the given object
+	 * @param  {Object} obj The object to stringify
+	 * @return {String}     If the object is an object, parse as JSON
+	 */
+	const toReadableString = obj => typeof obj === 'object' ? JSON.stringify(obj, null, 4) : obj;
+
 	var passed = Test.prototype.getResult(validationFunction, expectedResult, actualResult) === true;
 
 	// The config wants passed tests to be hidden
@@ -220,7 +228,7 @@ Test.prototype.createResult = (message, expectedResult, actualResult, validation
 		result += '[✔] Passed!';
 		bgColor = '#c8e6c9';
 	} else {
-		result += `[✖] Failed. Expected ${strings.wrapperBegin}${expectedResult}${strings.wrapperEnd} (${typeof expectedResult}), got ${strings.wrapperBegin}${actualResult}${strings.wrapperEnd} (${typeof actualResult}) instead.`;
+		result += `[✖] Failed. Expected ${strings.wrapperBegin}${toReadableString(expectedResult)}${strings.wrapperEnd} (${typeof expectedResult}), got ${strings.wrapperBegin}${toReadableString(actualResult)}${strings.wrapperEnd} (${typeof actualResult}) instead.`;
 		bgColor = '#ff8a80';
 	}
 
