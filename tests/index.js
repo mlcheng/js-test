@@ -55,13 +55,13 @@ Test('Deep object validation should be correct')
 		k: ['a', 'b', [1, 2]]
 	});
 
-Test('Failed tests should be colored (use your eyes to verify)')
-	.assert(0.1+0.2)
-	.toBe(0.3);
-
 let obj = {
+	prop: false,
 	fn: () => {
-		console.log('Hello');
+		this.prop = true;
+	},
+	fn2: () => {
+		this.prop = true;
 	}
 };
 Test('Observed functions know when they are called')
@@ -74,3 +74,19 @@ Test('Observed functions are reset')
 	.observe(obj, 'fn')
 	.expect(obj.fn)
 	.notToHaveBeenCalled();
+
+Test('Observed functions do not have to call through to the real function')
+	.observe(obj, 'fn', false)
+	.do(() => { obj.fn(); })
+	.expect(obj.prop)
+	.toBe(false);
+
+Test('Can observe multiple functions')
+	.observe(obj, 'fn')
+	.observe(obj, 'fn2')
+	.expect(obj.fn)
+	.notToHaveBeenCalled();
+
+Test('Failed tests should be colored (use your eyes to verify)')
+	.assert(0.1+0.2)
+	.toBe(0.3);

@@ -36,13 +36,14 @@ function Test(message) {
 
 	/**
 	 * An Observed function. This proxies the original function and observes whether or not calls have been made to it.
-	 * TODO: Maybe give an option to call through to the actual function?
 	 */
-	function ObservedFunction(obj, fn, origFunction) {
+	function ObservedFunction(obj, fn, origFunction, callThrough) {
 		let called = false;
 		return (...args) => {
 			if(args[0] !== FAKE_CALL) {
-				origFunction(...args);
+				// Only call through to the original function if specified
+				if(callThrough) origFunction(...args);
+
 				called = true;
 			}
 			return { called, obj, fn, origFunction };
@@ -98,10 +99,11 @@ function Test(message) {
 	 * Observe a function on an object.
 	 * @param  {Object}   obj The object where the function lives
 	 * @param  {Function} fn  The function to observe
+	 * @param  {Boolean} callThrough Specifies whether or not the original function should be called. This is true by default.
 	 * @return {Object}       The Test object for chaining
 	 */
-	exports.observe = (obj, fn) => {
-		obj[fn] = new ObservedFunction(obj, fn, obj[fn]);
+	exports.observe = (obj, fn, callThrough = true) => {
+		obj[fn] = new ObservedFunction(obj, fn, obj[fn], callThrough);
 		return exports;
 	};
 

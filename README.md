@@ -118,6 +118,18 @@ Test('Service did not make a call')
 	.notToHaveBeenCalled();
 ```
 
+If you do not want the original function to be called, just set `false` when observing the function.
+
+```javascript
+Test('Service made a call')
+	.observe(apiService, 'call', false)
+	.do(() => {
+		triggerCall();
+	})
+	.expect(apiService.call)
+	.toHaveBeenCalled(); // The actual `apiService.call` was not called
+```
+
 ### Test config
 You have a few options to configure the test.
 
