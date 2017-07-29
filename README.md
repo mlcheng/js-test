@@ -14,20 +14,20 @@ const add = (...nums) => nums.reduce((total, n) => total + n);
 To test this function, first set the description of the test case.
 
 ```javascript
-Test("1+1 should be 2");
+Test('1+1 should be 2');
 ```
 
 After that, you can specify the test to run
 
 ```javascript
-Test("1+1 should be 2")
+Test('1+1 should be 2')
 	.expect(add(1, 1));
 ```
 
 And then what you expect the result to be
 
 ```javascript
-Test("1+1 should be 2")
+Test('1+1 should be 2')
 	.expect(add(1, 1))
 	.toBe(2);
 ```
@@ -44,7 +44,7 @@ This test framework also has some extras that may be useful.
 By default, the `to()` method will use strict comparison (`===`) when comparing the expected and actual result. You can specify what kind of comparator to use in your test using `.using()`.
 
 ```javascript
-Test("The word 'hello' should contain the letter 'h'")
+Test('The word `hello` should contain the letter 'h'')
 	.using((expected, actual) => ~actual.indexOf(expected))
 	.expect('hello')
 	.toHave('h');
@@ -75,7 +75,7 @@ const updateData = () => {
 	data = 'hello';
 };
 
-Test("Get data from service")
+Test('Get data from service')
 	.do(updateData)
 	.expect(data)
 	.toBe('hello');
@@ -86,9 +86,36 @@ Note that you can `.expect()` a Promise to have a result too.
 ```javascript
 const fetchName = Promise.resolve('Michael');
 
-Test("Get name from Promise")
+Test('Get name from Promise')
 	.expect(fetchName)
 	.toBe('Michael');
+```
+
+### Observers
+Similar to Jasmine, you can observe a function to see whether or not it has been called.
+
+```javascript
+function triggerCall() {
+	apiService.call();
+}
+
+Test('Service made a call')
+	.observe(apiService, 'call')
+	.do(() => {
+		triggerCall();
+	})
+	.expect(apiService.call)
+	.toHaveBeenCalled();
+```
+
+You can also expect a function *not* to have been called.
+
+```javascript
+Test('Service did not make a call')
+	.observe(apiService, 'call')
+	.do(() => {})
+	.expect(apiService.call)
+	.notToHaveBeenCalled();
 ```
 
 ### Test config

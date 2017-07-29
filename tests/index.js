@@ -58,3 +58,19 @@ Test('Deep object validation should be correct')
 Test('Failed tests should be colored (use your eyes to verify)')
 	.assert(0.1+0.2)
 	.toBe(0.3);
+
+let obj = {
+	fn: () => {
+		console.log('Hello');
+	}
+};
+Test('Observed functions know when they are called')
+	.observe(obj, 'fn')
+	.do(() => { obj.fn(); })
+	.expect(obj.fn)
+	.toHaveBeenCalled();
+
+Test('Observed functions are reset')
+	.observe(obj, 'fn')
+	.expect(obj.fn)
+	.notToHaveBeenCalled();

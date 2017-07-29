@@ -24,10 +24,30 @@ function Test(message) {
 	var exports = {};
 
 	/**
+	 * A Symbol that specifies that a call to an ObservedFunction is fake
+	 */
+	const FAKE_CALL = Symbol('FAKE_CALL');
+
+	/**
 	 * The validation function to use for comparing results
 	 * @type {Function}
 	 */
 	var _validationFunction;
+
+	/**
+	 * An Observed function. This proxies the original function and observes whether or not calls have been made to it.
+	 * TODO: Maybe give an option to call through to the actual function?
+	 */
+	function ObservedFunction(obj, fn, origFunction) {
+		let called = false;
+		return (...args) => {
+			if(args[0] !== FAKE_CALL) {
+				origFunction(...args);
+				called = true;
+			}
+			return { called, obj, fn, origFunction };
+		};
+	}
 
 	function UnitTest(actualResult) {
 		var exports = {};
@@ -50,8 +70,40 @@ function Test(message) {
 
 		exports.equals = exports.to;
 
+		/**
+		 * A comparator used for observing ObservedFunctions
+		 * @param  {Boolean} called Specifies whether or not a function should have been called
+		 */
+		exports.toHaveBeenCalled = (called = true) => {
+			Promise.resolve(actualResult).then((result) => {
+				result = result(FAKE_CALL);
+				Test.prototype.showResult(message, result.called, called, _validationFunction);
+
+				// Reset the proxied function to its original
+				result.obj[result.fn] = result.origFunction;
+			});
+		};
+
+		/**
+		 * An alias for observing ObservedFunctions which expects the function not to have been called.
+		 */
+		exports.notToHaveBeenCalled = () => {
+			exports.toHaveBeenCalled(false);
+		};
+
 		return exports;
 	}
+
+	/**
+	 * Observe a function on an object.
+	 * @param  {Object}   obj The object where the function lives
+	 * @param  {Function} fn  The function to observe
+	 * @return {Object}       The Test object for chaining
+	 */
+	exports.observe = (obj, fn) => {
+		obj[fn] = new ObservedFunction(obj, fn, obj[fn]);
+		return exports;
+	};
 
 	/**
 	 * Set a validation function to use
@@ -105,7 +157,7 @@ Test.ValidationFunction = {
 		}
 		return true;
 	},
-	
+
 	OBJECT_DEEP: function(e, a) {
 		// http://stackoverflow.com/a/16788517/4230736
 		if(e == null || a == null) return e === a;
