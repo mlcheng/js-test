@@ -76,13 +76,12 @@ function Test(message) {
 		 * @param  {Boolean} called Specifies whether or not a function should have been called
 		 */
 		exports.toHaveBeenCalled = (called = true) => {
-			Promise.resolve(actualResult).then((result) => {
-				result = result(FAKE_CALL);
-				Test.prototype.showResult(message, result.called, called, _validationFunction);
+			// Don't need to resolve the result since we know it's not a Promise. It's an ObservedFunction. If we wait for the Promise to resolve, the original function is only set after all tests have run. Lol...
+			actualResult = actualResult(FAKE_CALL);
+			Test.prototype.showResult(message, called, actualResult.called, _validationFunction);
 
-				// Reset the proxied function to its original
-				result.obj[result.fn] = result.origFunction;
-			});
+			// Reset the proxied function to its original
+			actualResult.obj[actualResult.fn] = actualResult.origFunction;
 		};
 
 		/**
