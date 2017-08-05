@@ -57,11 +57,11 @@ Test('Deep object validation should be correct')
 
 let obj = {
 	prop: false,
-	fn: () => {
-		this.prop = true;
+	fn() {
+		obj.prop = true;
 	},
-	fn2: () => {
-		this.prop = true;
+	fn2() {
+		obj.prop = true;
 	}
 };
 Test('Observed functions know when they are called')
@@ -75,9 +75,15 @@ Test('Observed functions are reset')
 	.expect(obj.fn)
 	.notToHaveBeenCalled();
 
+Test('Observed functions can call through to the real function')
+	.observe(obj, 'fn')
+	.do(() => { obj.fn(); })
+	.expect(obj.prop)
+	.toBe(true);
+
 Test('Observed functions do not have to call through to the real function')
 	.observe(obj, 'fn', false)
-	.do(() => { obj.fn(); })
+	.do(() => { obj.prop = false; obj.fn(); })
 	.expect(obj.prop)
 	.toBe(false);
 

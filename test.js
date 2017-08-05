@@ -21,7 +21,7 @@
 function Test(message) {
 
 	// Exposed methods
-	var exports = {};
+	let exports = {};
 
 	/**
 	 * A Symbol that specifies that a call to an ObservedFunction is fake
@@ -29,37 +29,52 @@ function Test(message) {
 	const FAKE_CALL = Symbol('FAKE_CALL');
 
 	/**
+	 * An array of observed functions to be restored at the end of the test.
+	 * @type {Array}
+	 */
+	let _observedFunctions = [];
+
+	/**
 	 * The validation function to use for comparing results
 	 * @type {Function}
 	 */
-	var _validationFunction;
+	let _validationFunction;
 
 	/**
 	 * An Observed function. This proxies the original function and observes whether or not calls have been made to it.
 	 */
 	function ObservedFunction(obj, fn, origFunction, callThrough) {
 		let called = false;
-		return (...args) => {
-			if(args[0] !== FAKE_CALL) {
-				// Only call through to the original function if specified
-				if(callThrough) origFunction(...args);
-
-				called = true;
+		return new Proxy(origFunction, {
+			apply(target, thisArg, args) {
+				if(args[0] !== FAKE_CALL) {
+					if(callThrough) origFunction.apply(thisArg, args);
+					called = true;
+				}
+				return { called, obj, fn, origFunction };
 			}
-			return { called, obj, fn, origFunction };
-		};
+		});
 	}
 
 	function UnitTest(actualResult) {
-		var exports = {};
+		function cleanup() {
+			while(_observedFunctions.length) {
+				const proxy = _observedFunctions.pop()(FAKE_CALL);
+				// Reset the proxied function to its original
+				proxy.obj[proxy.fn] = proxy.origFunction;
+			}
+		}
+
+		let exports = {};
 
 		/**
 		 * The main comparison function
 		 * @param  {Object} expectedResult The expected result
 		 */
 		exports.to = expectedResult => {
-			Promise.resolve(actualResult).then((result) => {
+			Promise.resolve(actualResult).then(result => {
 				Test.prototype.showResult(message, expectedResult, result, _validationFunction);
+				cleanup();
 			});
 		};
 
@@ -80,8 +95,7 @@ function Test(message) {
 			actualResult = actualResult(FAKE_CALL);
 			Test.prototype.showResult(message, called, actualResult.called, _validationFunction);
 
-			// Reset the proxied function to its original
-			actualResult.obj[actualResult.fn] = actualResult.origFunction;
+			cleanup();
 		};
 
 		/**
@@ -102,7 +116,9 @@ function Test(message) {
 	 * @return {Object}       The Test object for chaining
 	 */
 	exports.observe = (obj, fn, callThrough = true) => {
-		obj[fn] = new ObservedFunction(obj, fn, obj[fn], callThrough);
+		const proxy = new ObservedFunction(obj, fn, obj[fn], callThrough);
+		obj[fn] = proxy;
+		_observedFunctions.push(proxy);
 		return exports;
 	};
 
