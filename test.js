@@ -19,6 +19,7 @@
  * See Test.ValidationFunction for built-in examples
  */
 function Test(message) {
+	console.log('This framework is DEPRECATED. Please use Janus.js instead https://github.com/mlcheng/js-janus');
 
 	// Exposed methods
 	let exports = {};

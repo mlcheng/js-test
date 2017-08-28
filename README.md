@@ -1,5 +1,7 @@
 # js-test
 
+## This framework is DEPRECATED. Please use [Janus.js](https://github.com/mlcheng/js-janus) instead.
+
 Looking for a no-nonsense testing framework for JavaScript? Look no further! This is a barebones testing framework, but it's fluent and it works.
 
 A demo is available on my [playground](https://www.michaelcheng.us/playground/lib-js/test/).
